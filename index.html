@@ -587,6 +587,7 @@
 </head>
 <body>
     <canvas class="confetti" id="confetti-canvas"></canvas>
+    <audio id="birthday-audio" src="feliz%20cumplea%C3%B1o.m4a" preload="auto" autoplay playsinline loop></audio>
     <main class="card" id="birthday-card" role="region" aria-label="Tarjeta de cumpleaños interactiva">
         <div class="balloons">
             <div class="balloon" aria-hidden="true"></div>
@@ -609,6 +610,28 @@
         document.addEventListener('DOMContentLoaded', function() {
             const birthdayCard = document.getElementById('birthday-card');
             const confettiCanvas = document.getElementById('confetti-canvas');
+            const birthdayAudio = document.getElementById('birthday-audio');
+
+            // Attempt to autoplay the birthday song. Some browsers block autoplay with sound.
+            const startTime = Date.now();
+            function tryPlayAudio() {
+                birthdayAudio.play().then(() => {
+                    // Successfully started, clear retry timer
+                    clearInterval(retryInterval);
+                }).catch(() => {
+                    // If more than 8 seconds passed, stop retrying and wait for first user interaction
+                    if (Date.now() - startTime > 8000) {
+                        clearInterval(retryInterval);
+                        document.body.addEventListener('click', () => {
+                            birthdayAudio.play().catch(() => {});
+                        }, { once: true });
+                    }
+                });
+            }
+            // initial attempt immediately
+            tryPlayAudio();
+            // Retry every 2 seconds for up to 8 seconds
+            const retryInterval = setInterval(tryPlayAudio, 2000);
             const ctx = confettiCanvas.getContext('2d');
             let animationFrameId;
 
