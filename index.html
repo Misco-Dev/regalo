@@ -587,7 +587,7 @@
 </head>
 <body>
     <canvas class="confetti" id="confetti-canvas"></canvas>
-    <audio id="birthday-audio" src="feliz%20cumplea%C3%B1o.m4a" preload="auto" autoplay playsinline loop></audio>
+    <audio id="birthday-audio" src="feliz%20cumplea%C3%B1o.m4a" preload="auto" autoplay playsinline muted loop></audio>
     <main class="card" id="birthday-card" role="region" aria-label="Tarjeta de cumpleaños interactiva">
         <div class="balloons">
             <div class="balloon" aria-hidden="true"></div>
@@ -615,7 +615,21 @@
             // Attempt to autoplay the birthday song. Some browsers block autoplay with sound.
             const startTime = Date.now();
             function tryPlayAudio() {
+                birthdayAudio.volume = 0; // start silent for autoplay policy
                 birthdayAudio.play().then(() => {
+                    // fade in volume after 300ms
+                    setTimeout(() => {
+                        birthdayAudio.muted = false;
+                        const fadeDuration = 1500; // ms
+                        const steps = 15;
+                        const stepTime = fadeDuration / steps;
+                        let currentStep = 0;
+                        const fadeInterval = setInterval(() => {
+                            currentStep++;
+                            birthdayAudio.volume = Math.min(currentStep / steps, 1);
+                            if (currentStep >= steps) clearInterval(fadeInterval);
+                        }, stepTime);
+                    }, 300);
                     // Successfully started, clear retry timer
                     clearInterval(retryInterval);
                 }).catch(() => {
